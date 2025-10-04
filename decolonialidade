@@ -11,22 +11,22 @@
   font-size: 28px;
   font-weight: bold;
   background: linear-gradient(90deg, #c59f9f, #f3b735, #17c0e6, #0edba5);
-  color: #4b2e2e; /* marrom escuro */
+  color: #4b2e2e; 
   white-space: nowrap;
   overflow: hidden;
-  border-right: 3px solid #a0522d; /* cursor marrom */
+  border-right: 3px solid #a0522d;
   width: 0;
   animation: typing 4s steps(50, end) forwards,
              blink 0.8s step-end infinite;
 }
 
-/* Digitação */
+
 @keyframes typing {
   from { width: 0; }
   to { width: 100%; }
 }
 
-/* Cursor piscando */
+
 @keyframes blink {
   50% { border-color: transparent; }
 }
@@ -42,17 +42,17 @@
 
   :root {
   --bg:#fbf6f6; 
-  --card:#d8d0d0; /* cor do fundo dos quadros - marrom claro (wheat) */
+  --card:#d8d0d0; 
   --fg:#0b1220; 
   --muted:#556;
-  --accent:#a0522d; /* já trocado para marrom */
+  --accent:#a0522d;
 }
 
  body{
   font-family: Arial, Helvetica, sans-serif;
   margin: 0;
   padding: 1rem;
-  background: #dabbac;  /* marrom claro (tom tipo "tan") */
+  background: #dabbac; 
   color: var(--fg);
 }
 
@@ -66,8 +66,8 @@
     font-size:1rem;
   }
   button {
-  background-color: #a0522d;  /* cor de fundo do botão */
-  color: #fff;               /* cor do texto */
+  background-color: #a0522d; 
+  color: #fff;              
   border: none;
   padding: 10px 16px;
   border-radius: 6px;
@@ -75,7 +75,7 @@
 }
 
 button:hover {
-  background-color: #8b4513; /* cor no hover */
+  background-color: #8b4513; 
 }
 
   button:hover{ opacity:0.9; }
@@ -89,7 +89,6 @@ button:hover {
     gap:1rem; margin-top:1rem;
   }
 
-  /* Estilos para a gravação - ADICIONADOS */
   .recording-status {
     margin: 10px 0;
     padding: 10px;
@@ -157,9 +156,7 @@ button:hover {
 
 
 <script>
-// DICA: Substitua os valores 'audio/...' pelas URLs ou caminhos reais dos seus arquivos
 
-// DICA: Substitua os valores 'audio/...' pelas URLs ou caminhos reais dos seus arquivos
   const audioMapping = {
     "Colonização do Brasil (século XVI e XVII)": {
       "Português": "audio/Text-to-Speech.mp3", 
@@ -178,7 +175,6 @@ button:hover {
     }
   };
 
-// --- Imagens de Perfil do Narrador (Fallback ou uso no modo Comparação) ---
 const imageMapping = {
   "Cronista português": "https://exemplo.com/perfil_cronista.jpg", 
   "Indígena": "https://exemplo.com/perfil_indigena.png",
@@ -187,7 +183,6 @@ const imageMapping = {
   "Estudante": "https://exemplo.com/perfil_estudante.png"
 };
 
-// --- Imagens específicas por Evento e Narrador ---
 const eventImageMapping = {
   "Colonização do Brasil (século XVI e XVII)": {
     "Cronista português": "https://s1.static.brasilescola.uol.com.br/be/2024/09/revolucao-pernambucana.jpg",
@@ -206,7 +201,6 @@ const eventImageMapping = {
   }
 };
 
-// --- Narrativas por Evento (Mantido) ---
 const data = {
   "Colonização do Brasil (século XVI e XVII)":{
     narrativas:{
@@ -253,7 +247,6 @@ const data = {
   
 };
 
-// --- Elementos ---
 const eventoSelect=document.getElementById('eventoSelect');
 const narradorSelect=document.getElementById('narradorSelect');
 const narrativeText=document.getElementById('narrativeText');
@@ -265,20 +258,17 @@ const compareBtn=document.getElementById('compareBtn');
 const comparisonArea=document.getElementById('comparisonArea');
 const resetViewBtn=document.getElementById('resetView');
 
-// --- Elementos de gravação ADICIONADOS ---
 const recStartBtn = document.getElementById('recStart');
 const recStopBtn = document.getElementById('recStop');
 const recPlayBtn = document.getElementById('recPlay');
 const recDeleteBtn = document.getElementById('recDelete');
 const recordingStatus = document.getElementById('recordingStatus');
 
-// --- Preencher eventos ---
 Object.keys(data).forEach(ev=>{
   let opt=document.createElement('option'); opt.value=ev; opt.textContent=ev;
   eventoSelect.appendChild(opt);
 });
 
-// --- Preencher narradores ---
 function populateNarrators(){
   narradorSelect.innerHTML='';
   if(eventoSelect.value && data[eventoSelect.value]){
@@ -291,7 +281,6 @@ function populateNarrators(){
 eventoSelect.addEventListener('change', populateNarrators);
 populateNarrators();
 
-// --- Reset ---
 resetViewBtn.addEventListener('click', ()=>{
   eventoSelect.selectedIndex=0;
   narradorSelect.innerHTML='';
@@ -302,18 +291,15 @@ resetViewBtn.addEventListener('click', ()=>{
   updateRecordingStatus('');
 });
 
-// --- Mostrar narrativa (Lógica atualizada para nova imagem) ---
 document.getElementById('showNarrative').addEventListener('click', ()=>{
   const ev=eventoSelect.value, nar=narradorSelect.value;
   if(ev && nar){
-    // Se for Estudante e houver gravação, mostra mensagem especial
     if (nar === "Estudante" && hasRecordingForCurrentEvent()) {
       narrativeText.textContent = "🎤 Narrativa em áudio disponível - clique em 'Reproduzir Gravação' para ouvir.";
     } else {
       narrativeText.textContent = data[ev].narrativas[nar];
     }
 
-    // Lógica para obter a imagem específica da situação (Evento + Narrador)
     const eventImgSrc = eventImageMapping[ev] ? eventImageMapping[ev][nar] : '';
     let imageToShow = '';
     let altText = '';
@@ -322,7 +308,6 @@ document.getElementById('showNarrative').addEventListener('click', ()=>{
       imageToShow = eventImgSrc;
       altText = `Imagem do evento ${ev} na perspectiva de ${nar}`;
     } else {
-      // Fallback: se não houver imagem para a situação, usa a imagem do perfil do narrador
       imageToShow = imageMapping[nar] || '';
       altText = `Imagem ilustrativa do narrador ${nar}`;
     }
@@ -333,14 +318,12 @@ document.getElementById('showNarrative').addEventListener('click', ()=>{
       eventImageContainer.innerHTML = '';
     }
     
-    // Habilita o botão de Audiodescrição se houver texto AD
     playADBtn.disabled=!data[ev].ad[nar];
     playADBtn.onclick=()=>speakText(data[ev].ad[nar],"pt-BR");
     comparisonArea.innerHTML='';
   }
 });
 
-// --- Comparação (Lógica atualizada para nova imagem) ---
 compareBtn.addEventListener('click', ()=>{
   const ev=eventoSelect.value;
   if(!ev) return;
@@ -354,12 +337,10 @@ compareBtn.addEventListener('click', ()=>{
     const div=document.createElement('div');
     div.className="card";
     
-    // Busca a imagem específica do evento/narrador (ou usa a imagem de perfil como fallback)
     const compareImgSrc = eventImageMapping[ev] && eventImageMapping[ev][n] ? eventImageMapping[ev][n] : imageMapping[n];
     const altText = `Imagem do evento ${ev} na perspectiva de ${n}`;
 
     let textoNarrativa = narrativas[n];
-    // Se for Estudante e houver gravação, mostra mensagem especial
     if (n === "Estudante" && hasRecordingForCurrentEvent()) {
       textoNarrativa = "🎤 Narrativa em áudio (gravação do estudante)";
     }
@@ -376,11 +357,6 @@ compareBtn.addEventListener('click', ()=>{
   comparisonArea.appendChild(container);
 });
 
-// ------------------------------------------------------------------
-// --- IMPLEMENTAÇÃO DE ÁUDIO REVISADA ---
-// ------------------------------------------------------------------
-
-// --- TTS (Text-to-Speech) ---
 let voices=[];
 function loadVoices(){ voices=speechSynthesis.getVoices(); }
 speechSynthesis.onvoiceschanged=loadVoices;
@@ -393,20 +369,18 @@ function speakText(text,lang){
   speechSynthesis.speak(u);
 }
 
-// Variável global para controlar o áudio REAL que está sendo reproduzido
+
 let currentAudio = null;
 
 playAudioBtn.addEventListener('click', ()=>{
   const ev = eventoSelect.value;
   const nar = narradorSelect.value;
   
-  // 1. Para o áudio anterior, se estiver tocando
   if (currentAudio) {
     currentAudio.pause();
     currentAudio.currentTime = 0;
   }
 
-  // Se for Estudante e houver gravação, toca a gravação
   if (nar === "Estudante" && hasRecordingForCurrentEvent()) {
     const recordingURL = getRecordingForCurrentEvent();
     currentAudio = new Audio(recordingURL);
@@ -417,46 +391,36 @@ playAudioBtn.addEventListener('click', ()=>{
     return;
   }
 
-  // 2. Tenta buscar o caminho do arquivo de áudio real
   const audioPath = audioMapping[ev] ? audioMapping[ev][nar] : null;
 
   if (audioPath) {
-    // 3. Se encontrar o caminho, tenta reproduzir o arquivo
     currentAudio = new Audio(audioPath);
     currentAudio.play()
         .then(() => {
-            // Sucesso na reprodução
             console.log("Áudio real reproduzido com sucesso:", audioPath);
         })
         .catch(error => {
-            // 4. Fallback se a reprodução do arquivo real falhar (Ex: bloqueio do navegador, arquivo não encontrado)
             console.error("Erro ao tentar reproduzir arquivo de áudio. Usando TTS como fallback:", error);
             speakText(data[ev].narrativas[nar], "pt-BR");
         });
   } else if (ev && nar) {
-    // 5. Se não houver arquivo real mapeado, usa o TTS
     console.log("Caminho de áudio não mapeado, usando TTS.");
     speakText(data[ev].narrativas[nar], "pt-BR");
   }
 });
 
 stopAudioBtn.addEventListener('click', ()=>{
-  speechSynthesis.cancel(); // Para o TTS
+  speechSynthesis.cancel(); 
   if(currentAudio){
     currentAudio.pause();
     currentAudio.currentTime = 0;
   }
 });
 
-// ------------------------------------------------------------------
-// --- SISTEMA DE GRAVAÇÃO CORRIGIDO ---
-// ------------------------------------------------------------------
-
 let mediaRecorder = null;
 let audioChunks = [];
 let audioStream = null;
 
-// Função para atualizar o status da gravação
 function updateRecordingStatus(message, type = '') {
   recordingStatus.textContent = message;
   recordingStatus.className = 'recording-status';
@@ -465,13 +429,11 @@ function updateRecordingStatus(message, type = '') {
   }
 }
 
-// Função para verificar se há gravação para o evento atual
 function hasRecordingForCurrentEvent() {
   const eventKey = `recording_${eventoSelect.value.replace(/\s+/g, '_')}`;
   return localStorage.getItem(eventKey) !== null;
 }
 
-// Função para obter a gravação do evento atual
 function getRecordingForCurrentEvent() {
   const eventKey = `recording_${eventoSelect.value.replace(/\s+/g, '_')}`;
   const savedRecording = localStorage.getItem(eventKey);
@@ -483,14 +445,12 @@ function getRecordingForCurrentEvent() {
   return null;
 }
 
-// Função para salvar a gravação no localStorage
 function saveRecording(blob) {
   const reader = new FileReader();
   reader.onload = function() {
     const arrayBuffer = this.result;
     const uint8Array = new Uint8Array(arrayBuffer);
     
-    // Salva no localStorage com chave única baseada no evento
     const eventKey = `recording_${eventoSelect.value.replace(/\s+/g, '_')}`;
     localStorage.setItem(eventKey, JSON.stringify(Array.from(uint8Array)));
     
@@ -498,7 +458,6 @@ function saveRecording(blob) {
     recPlayBtn.disabled = false;
     recDeleteBtn.disabled = false;
     
-    // Atualiza a narrativa do Estudante para mostrar que há gravação
     if (narradorSelect.value === "Estudante") {
       narrativeText.textContent = "🎤 Narrativa em áudio disponível - clique em 'Reproduzir Gravação' para ouvir.";
     }
@@ -506,7 +465,6 @@ function saveRecording(blob) {
   reader.readAsArrayBuffer(blob);
 }
 
-// Função para excluir gravação
 function deleteRecording() {
   const eventKey = `recording_${eventoSelect.value.replace(/\s+/g, '_')}`;
   localStorage.removeItem(eventKey);
@@ -515,20 +473,17 @@ function deleteRecording() {
   recPlayBtn.disabled = true;
   recDeleteBtn.disabled = true;
   
-  // Restaura a narrativa original do Estudante
   if (narradorSelect.value === "Estudante") {
     narrativeText.textContent = data[eventoSelect.value].narrativas["Estudante"] || "";
   }
 }
 
-// Inicializar sistema de gravação
 async function initializeRecording() {
   try {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       throw new Error('Seu navegador não suporta gravação de áudio');
     }
 
-    // Verificar se há gravação salva para o evento atual
     checkSavedRecording();
 
   } catch (error) {
@@ -538,7 +493,6 @@ async function initializeRecording() {
   }
 }
 
-// Verificar se há gravação salva
 function checkSavedRecording() {
   if (hasRecordingForCurrentEvent()) {
     recPlayBtn.disabled = false;
@@ -549,7 +503,6 @@ function checkSavedRecording() {
   }
 }
 
-// Event Listeners para gravação
 recStartBtn.addEventListener('click', async () => {
   if (!eventoSelect.value) {
     updateRecordingStatus('❌ Selecione um evento primeiro');
@@ -557,7 +510,6 @@ recStartBtn.addEventListener('click', async () => {
   }
 
   try {
-    // Obter acesso ao microfone
     audioStream = await navigator.mediaDevices.getUserMedia({ 
       audio: {
         echoCancellation: true,
@@ -566,7 +518,6 @@ recStartBtn.addEventListener('click', async () => {
       } 
     });
 
-    // Criar MediaRecorder
     mediaRecorder = new MediaRecorder(audioStream, {
       mimeType: 'audio/webm;codecs=opus'
     });
@@ -583,7 +534,6 @@ recStartBtn.addEventListener('click', async () => {
       const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
       saveRecording(audioBlob);
       
-      // Parar todas as tracks do stream
       if (audioStream) {
         audioStream.getTracks().forEach(track => track.stop());
         audioStream = null;
@@ -595,7 +545,6 @@ recStartBtn.addEventListener('click', async () => {
       updateRecordingStatus('❌ Erro na gravação');
     };
 
-    // Iniciar gravação
     mediaRecorder.start();
     recStartBtn.disabled = true;
     recStopBtn.disabled = false;
@@ -620,14 +569,12 @@ recStopBtn.addEventListener('click', () => {
 recPlayBtn.addEventListener('click', () => {
   const recordingURL = getRecordingForCurrentEvent();
   if (recordingURL) {
-    // Para qualquer áudio que esteja tocando
     if (currentAudio) {
       currentAudio.pause();
       currentAudio.currentTime = 0;
     }
     speechSynthesis.cancel();
     
-    // Toca a gravação
     currentAudio = new Audio(recordingURL);
     currentAudio.play().catch(error => {
       console.error('Erro ao reproduzir áudio:', error);
@@ -638,12 +585,10 @@ recPlayBtn.addEventListener('click', () => {
 
 recDeleteBtn.addEventListener('click', deleteRecording);
 
-// Verificar gravação salva quando mudar o evento
 eventoSelect.addEventListener('change', () => {
   checkSavedRecording();
 });
 
-// Inicializar o sistema de gravação quando a página carregar
 initializeRecording();
 </script>
 </body>
