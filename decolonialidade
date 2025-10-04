@@ -1,0 +1,650 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Históricas Decoloniais</title>
+<style>
+
+
+.main-title {
+  font-size: 28px;
+  font-weight: bold;
+  background: linear-gradient(90deg, #c59f9f, #f3b735, #17c0e6, #0edba5);
+  color: #4b2e2e; /* marrom escuro */
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 3px solid #a0522d; /* cursor marrom */
+  width: 0;
+  animation: typing 4s steps(50, end) forwards,
+             blink 0.8s step-end infinite;
+}
+
+/* Digitação */
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+/* Cursor piscando */
+@keyframes blink {
+  50% { border-color: transparent; }
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 1.2rem;
+  color: linear-gradient(90deg, #c59f9f, #f3b735, #17c0e6, #0edba5);
+  max-width: 800px;
+  margin: 0 auto 1rem auto;
+  line-height: 1.5;
+}
+
+  :root {
+  --bg:#fbf6f6; 
+  --card:#d8d0d0; /* cor do fundo dos quadros - marrom claro (wheat) */
+  --fg:#0b1220; 
+  --muted:#556;
+  --accent:#a0522d; /* já trocado para marrom */
+}
+
+ body{
+  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 1rem;
+  background: #dabbac;  /* marrom claro (tom tipo "tan") */
+  color: var(--fg);
+}
+
+  h1,h2{ text-align:center; }
+  .card{
+    background:var(--card); border-radius:12px; padding:1rem;
+    margin:1rem auto; max-width:900px; box-shadow:0 2px 8px rgba(0,0,0,0.1);
+  }
+  select,button{
+    padding:0.5rem; margin:0.25rem 0; border-radius:6px; border:1px solid #6e6b6b;
+    font-size:1rem;
+  }
+  button {
+  background-color: #a0522d;  /* cor de fundo do botão */
+  color: #fff;               /* cor do texto */
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #8b4513; /* cor no hover */
+}
+
+  button:hover{ opacity:0.9; }
+  button:disabled{
+    background:#ccc; color:#666; cursor:not-allowed;
+  }
+  img{ max-width:100%; border-radius:8px; margin:0.5rem 0; }
+  .audio-btn{ margin-right:0.5rem; }
+  .compare-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:1rem; margin-top:1rem;
+  }
+
+  /* Estilos para a gravação - ADICIONADOS */
+  .recording-status {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: bold;
+  }
+  .recording-active {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #c62828;
+  }
+  .recording-saved {
+    background-color: #e8f5e8;
+    color: #2e7d32;
+    border: 1px solid #2e7d32;
+  }
+</style>
+</head>
+<body>
+<h1 class="main-title">Histórias em Vozes: Um Olhar Decolonial</h1>
+<p class="subtitle">Agora vamos comparar as narrativas historicas, podemos dizer que a historia dos livros sempre tem razão em relação aos eventos histróricos?</p>
+
+
+
+<div class="card" aria-label="Seleção e narrativa">
+  <fieldset>
+    <legend>Selecione evento e narrador</legend>
+    <label for="eventoSelect">Evento:</label>
+    <select id="eventoSelect" aria-label="Selecionar evento"></select><br>
+    <label for="narradorSelect">Narrador:</label>
+    <select id="narradorSelect" aria-label="Selecionar narrador"></select><br>
+    <button id="showNarrative">Mostrar narrativa</button>
+    <button id="resetView">Limpar</button>
+    <button id="compareBtn">Comparar narrativas</button>
+  </fieldset>
+
+  <div id="narrativeArea">
+    <h2>Narrativa</h2>
+    <div id="narrativeText">Selecione um evento e um narrador, depois clique em "Mostrar narrativa".</div>
+    <div id="eventImageContainer"></div>
+    <div id="audioControls">
+      <button id="playAudio" class="audio-btn">▶️ Reproduzir Áudio</button>
+      <button id="stopAudio" class="audio-btn">⏹️ Parar Áudio</button>
+      <button id="playAD" class="audio-btn" disabled>♿ Audiodescrição</button>
+    </div>
+  </div>
+
+  <div id="comparisonArea"></div>
+</div>
+
+<div class="card">
+  <h2>Conte-nos seu ponto de vista da história</h2>
+  <p>Selecione um Evento. <strong>Ao parar a gravação, o áudio será salvo automaticamente</strong> para o narrador <strong>"Estudante"</strong> neste evento.</p>
+  
+  <!-- ADICIONADO: Status da gravação -->
+  <div id="recordingStatus" class="recording-status"></div>
+  
+  <button id="recStart">🔴 Iniciar Gravação</button>
+  <button id="recStop" disabled>⏹️ Parar e Salvar</button>
+  <button id="recPlay" disabled>▶️ Reproduzir Gravação</button>
+  <!-- ADICIONADO: Botão para excluir gravação -->
+  <button id="recDelete" disabled>🗑️ Excluir Gravação</button>
+</div>
+
+
+<script>
+// DICA: Substitua os valores 'audio/...' pelas URLs ou caminhos reais dos seus arquivos
+
+// DICA: Substitua os valores 'audio/...' pelas URLs ou caminhos reais dos seus arquivos
+  const audioMapping = {
+    "Colonização do Brasil (século XVI e XVII)": {
+      "Português": "audio/Text-to-Speech.mp3", 
+      "Indígena": "audio/indi.mp3",
+      "Africano escravizado": "audio/neg.mp3",
+    },
+    "Período das Revoltas Regenciais (1831 – 1840)": {
+      "Cronista português": "audio/revolta_port.mp3",
+      "Indígena": "audio/revolta_indi.mp3",
+      "Africano escravizado": "audio/revolta_afri.mp3",
+    },
+    "Guerra de Canudos (1893 – 1897)": {
+      "Cronista português": "audio/revolta_port.mp3",
+      "Indígena": "audio/revolta_indi.mp3",
+      "Africano escravizado": "audio/revolta_afri.mp3",
+    }
+  };
+
+// --- Imagens de Perfil do Narrador (Fallback ou uso no modo Comparação) ---
+const imageMapping = {
+  "Cronista português": "https://exemplo.com/perfil_cronista.jpg", 
+  "Indígena": "https://exemplo.com/perfil_indigena.png",
+  "Africano escravizado": "https://exemplo.com/perfil_africano.png",
+  "Mulher negra": "https://exemplo.com/perfil_mulher_negra.jpg",
+  "Estudante": "https://exemplo.com/perfil_estudante.png"
+};
+
+// --- Imagens específicas por Evento e Narrador ---
+const eventImageMapping = {
+  "Colonização do Brasil (século XVI e XVII)": {
+    "Cronista português": "https://s1.static.brasilescola.uol.com.br/be/2024/09/revolucao-pernambucana.jpg",
+    "Indígena": "https://www.omunicipio.jor.br/wordpress/wp-content/uploads/2024/04/01-8.jpg",
+    "Africano escravizado": "https://ensinarhistoria.com.br/s21/wp-content/uploads/2015/06/07_Casa-de-negros_Rugendas.jpg",
+  },
+  "Período das Revoltas Regenciais (1831 – 1840)": {
+    "Cronista português": "https://exemplo.com/males_gravura_repressao.jpg",
+    "Indígena": "https://www.pstu.org.br/wp-content/uploads/2019/01/cabanagem-capa-1122096.png",
+    "Africano escravizado": "https://static.preparaenem.com/2023/11/pintura-retratando-escravo-sendo-punido-em-um-pelourinho-em-alusao-a-revolta-dos-males.jpg",
+  },
+  "Guerra de Canudos (1893 – 1897)": {
+    "Cronista português": "https://biografiaresumida.com.br/wp-content/webp-express/webp-images/uploads/2019/01/Guerra-de-Canudos.jpg.webp",
+    "Indígena": "https://bahia.ws/wp-content/uploads/2012/11/guerra_dos_canudos.jpg",
+    "Africano escravizado": "https://static.wixstatic.com/media/02a26c_fac557e40b9840ad80c9419333af4344~mv2.jpg/v1/fill/w_568,h_320,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/02a26c_fac557e40b9840ad80c9419333af4344~mv2.jpg",
+  }
+};
+
+// --- Narrativas por Evento (Mantido) ---
+const data = {
+  "Colonização do Brasil (século XVI e XVII)":{
+    narrativas:{
+      "Cronista português":"Escutai, fiéis súditos do Reino de Portugal! O que contemplamos no Brasil não é apenas terra distante; é um novo e glorioso alicerce do nosso Império. Desde a chegada de Cabral, cumprimos o dever sagrado de tomar posse e levar a luz da civilização a estas vastidões do Novo Mundo.Nosso propósito é a riqueza — clara e inabalável. Fizemos do litoral nordestino o maior engenho açucareiro do mundo, produzindo o ‘Ouro Branco’ que transborda nos mercados da Europa e fortalece os cofres da Coroa. O sistema colonial erguido por nossas mãos é sólido e disciplinado: a monocultura, o Pacto Colonial, a ordem que assegura que toda abundância — do açúcar à madeira, dos animais ao tabaco — reverta em benefício exclusivo de Lisboa. Aqui não há desperdício; há apenas a força de uma economia disciplinada, moldada para a glória do Reino",
+      "Indígena":"Quando o ‘povo do mar’ chegou, nossa vida mudou para sempre. Vieram como invasores, não como amigos. No início, houve curiosidade: trocamos pau-brasil por ferro. Mas logo vimos a verdade — queriam nossa terra e nossos corpos. Para eles, a floresta era mercadoria; para nós, era mãe, caça e memória dos ancestrais. Tentaram nos escravizar em plantações erguidas sobre nossas terras. Chamaram-nos de ‘índios cativos’, venderam-nos como animais. A guerra deles era estranha: o escambo criava dependência, e suas doenças — varíola, sarampo — dizimavam aldeias inteiras, mais mortais que suas espadas. Resistimos. Lutamos por nossos chefes, por nossos, por nossa liberdade. Nossa terra, nosso povo, nossa cultura foram atacados. Mas não desaparecemos. Nossa memória, nossas línguas e nossa luta permanecem. Para nós, a história do Brasil é a história de uma invasão contínua que ainda combatemos ",
+      "Africano escravizado":"Nossa história não começou no Brasil, mas nas terras que chamam de África. Fomos arrancados de nossos reinos à força. O que os portugueses chamam de tráfico, nós chamamos de Grande Roubo: a captura brutal, a travessia nos tumbeiros, onde a fome e a doença matavam muitos antes mesmo de chegar aqui. Neste chão, não éramos vistos como pessoas, mas como ‘peças’. Nosso corpo pertencia ao senhor, nosso tempo era medido pelo sol e pelo chicote. Nas plantações e engenhos, o trabalho era incessante, a violência diária. Nossa vida valia menos que o açúcar que produzíamos. Mas nunca aceitamos o cativeiro. Nossa alma permaneceu livre. Resistimos em todos os lugares, construímos quilombos, guardamos nossas culturas. O Brasil dos séculos XVI e XVII foi genocídio e escravidão que enriqueceram Portugal — mas também foi a história de uma luta implacável pela dignidade, que jamais foi derrotada.",
+      "Estudante":""
+    },
+    ad:{
+      "Cronista português":"Praia com embarcações portuguesas chegando, soldados descendo armados.",
+      "Indígena":"Praia vista pelos povos originários, com barcos imensos se aproximando.",
+      "Africano escravizado":"Representação simbólica do início do tráfico de africanos escravizados.",
+      "Estudante":""
+    }
+  },
+  "Período das Revoltas Regenciais (1831 – 1840)":{
+    narrativas:{
+      "Cronista português":"A ordem do Império está sob ataque, e a unidade nacional corre grave perigo! A ausência de um imperador adulto tem encorajado facções insubordinadas e a pior escória da sociedade. Somos os herdeiros legítimos e os guardiões da civilização que Portugal trouxe a estas terras. O nosso dever é manter o Brasil coeso, próspero e, acima de tudo, hierárquico. As revoltas que vemos no Pará, na Bahia e no Maranhão não são por 'justiça' ou 'liberdade', mas sim por anarquia e fanatismo. São bandos de desocupados, índios, caboclos e africanos que, em sua ignorância, ameaçam a estrutura que sustenta a nossa economia. No Maranhão, são os 'balaios'; na Bahia, os negros muçulmanos que conspiram para destruir a nossa fé e a nossa propriedade! Nossas tropas agirão com a força necessária para esmagar estas sedições, restaurar a paz e provar ao mundo que o Brasil é uma nação que pode se governar. Quem ameaçar a ordem, ameaça o próprio Império, e será tratado como traidor da pátria.",
+      "Indígena":"Chamam-nos ‘cabanos’, ‘selvagens’, ‘desordeiros’, mas somos os verdadeiros donos desta floresta e destas águas. Nossos antepassados trabalharam esta terra; vimos os barões do açúcar e do gado roubarem-na enquanto se vestem de seda nas cidades. Sob as leis dos portugueses e dos Regentes, continuamos sendo os últimos.Quando D. Pedro I partiu, acreditamos que seríamos ouvidos — mas nada mudou para quem vive à beira do rio e na pobreza. Persistem a escravidão, a humilhação e o roubo do nosso sustento. Pegamos em armas por fome e por justiça: queremos governar o Pará, queremos que a terra pertença a quem a cultiva e que os tiranos que se alimentam do nosso suor sejam expulsos. Derramamos sangue porque lutamos para não morrer de miséria; a força da floresta está conosco, e nosso clamor por um governo justo é mais forte que as balas do Império.",
+      "Africano escravizado":"O que nos trouxeram foi a escravidão, mas não conseguiram escravizar a nossa fé e o nosso conhecimento. Vimos a fraqueza do governo quando o Imperador era apenas um menino. Sabíamos que era o momento de agir. Em toda a Bahia, nos engenhos e nas ruas de Salvador, estávamos prontos. Nós, os Malês, conhecemos a disciplina e a Lei de Alá. O nosso plano era claro: libertar todos os irmãos negros, matar os senhores brancos e os mulatos que nos oprimiam, e estabelecer uma terra de justiça e igualdade, guiada pela nossa religião. Não lutávamos apenas pela liberdade do corpo; lutávamos pela liberdade da alma e pela nossa dignidade. Fomos traídos, sim, e a repressão foi terrível. Os Regentes nos caçaram como animais, nos prenderam, nos chicotearam e nos executaram na praça pública. Mas o nosso levante provou o nosso poder: escravo não é inofensivo. Mostramos que, mesmo nas senzalas e nas cidades, o espírito africano se organiza, conspira e tem a força de abalar o poder dos brancos. Nossas ações ecoaram por toda a colônia, dando esperança a cada homem e mulher que sonha em quebrar suas correntes.",
+      "Estudante":""
+    },
+    ad:{
+      "Cronista português":"Gravura com repressão portuguesa ao levante dos Malês.",
+      "Indígena":"Visão indígena da resistência negra na cidade de Salvador.",
+      "Africano escravizado":"Imagem de africanos muçulmanos escravizados vestidos de branco em rebelião.",
+      "Estudante":""
+    }
+  },
+  "Guerra de Canudos (1893 – 1897)":{
+    narrativas:{
+      "Cronista português":"O que presenciamos em Canudos não é um levante popular, mas uma revolta de fanáticos contra a jovem República. Antônio Conselheiro, esse beato lunático e perigoso, ilude as massas de miseráveis, prometendo um retorno à Monarquia e um fim aos impostos e ao casamento civil, pilares da nossa nova Ordem e Progresso. Desde a Proclamação da República, o sertão tem sido um foco de desobediência e superstição, e Canudos transformou-se em um foco de resistência à civilização. Eles acumularam armas e desafiaram a autoridade do Exército Nacional. Nossas tropas, representando a lei e a razão, tiveram que marchar sobre o arraial para extirpar este câncer social. A batalha foi longa e custou o sangue de muitos bravos. Mas a vitória da República é inquestionável: o local foi varrido, e a ameaça de um fanatismo político-religioso foi eliminada pela força da razão e do Estado. A história registrará a firmeza com que o Brasil moderno reagiu a essa praga da ignorância.",
+      "Indígena":"Chamaram nossa vida de 'fanatismo' e nosso arraial de 'covil de bandidos', mas Canudos era o nosso refúgio. O Conselheiro não era um rei, era um guia, um santo que nos deu esperança quando o mundo dos 'doutores' só nos dava fome e imposto. A seca castigava, e a República, que prometeu liberdade, só trouxe papeladas, novos fiscais e mais miséria. Quem era pobre e sem-terra podia construir uma vida no arraial: não havia pagamento, apenas trabalho coletivo e fé. Eles nos atacaram não por sermos contra a lei deles, mas por ousarmos ser independentes e felizes na nossa pobreza. Nossas mulheres e nossos filhos sofreram o terror dos canhões e fuzis. Lutamos até o último homem, não por um rei no Rio de Janeiro, mas pelo nosso chão, pela nossa fé e para não ter de morrer de novo nas mãos dos coronéis e do governo sem coração. Fomos massacrados, mas o que fizemos em Canudos foi uma luta pela dignidade do sertanejo.",
+      "Africano escravizado":"Naquele tempo de mudança de lei, a vida no sertão era dura para o liberto. A abolição veio, mas não veio a terra nem o trabalho digno. Muitos de nós, recém-saídos da escravidão, ou filhos de escravizados, fomos para Canudos porque o Conselheiro não olhava a cor nem a antiga condição. Lá, éramos todos irmãos, trabalhando a terra juntos. Era um lugar onde a 'Lei do Branco' não mandava e onde a nossa fé, misturada com as crenças do Conselheiro, nos protegia. Os fazendeiros e o Exército odiavam Canudos porque ali morava o medo de que o pobre tivesse poder. Eles tinham medo de ver o negro, o índio e o sertanejo juntos, rezando e construindo uma vida sem a dor do chicote. A guerra foi deles, mas a coragem foi nossa. Morremos defendendo a ideia de que o pobre tem direito a um pedaço de terra e a viver em paz, livre do chicote do coronel e da fome que o novo governo não se importava em curar.",
+      "Estudante":""
+  },
+    ad:{
+      "Cronista português":"Gravura com repressão portuguesa ao levante dos Malês.",
+      "Indígena":"Visão indígena da resistência negra na cidade de Salvador.",
+      "Africano escravizado":"Imagem de africanos muçulmanos escravizados vestidos de branco em rebelião.",
+      "Estudante":""
+    }
+  } 
+  
+};
+
+// --- Elementos ---
+const eventoSelect=document.getElementById('eventoSelect');
+const narradorSelect=document.getElementById('narradorSelect');
+const narrativeText=document.getElementById('narrativeText');
+const eventImageContainer=document.getElementById('eventImageContainer');
+const playAudioBtn=document.getElementById('playAudio');
+const stopAudioBtn=document.getElementById('stopAudio');
+const playADBtn=document.getElementById('playAD');
+const compareBtn=document.getElementById('compareBtn');
+const comparisonArea=document.getElementById('comparisonArea');
+const resetViewBtn=document.getElementById('resetView');
+
+// --- Elementos de gravação ADICIONADOS ---
+const recStartBtn = document.getElementById('recStart');
+const recStopBtn = document.getElementById('recStop');
+const recPlayBtn = document.getElementById('recPlay');
+const recDeleteBtn = document.getElementById('recDelete');
+const recordingStatus = document.getElementById('recordingStatus');
+
+// --- Preencher eventos ---
+Object.keys(data).forEach(ev=>{
+  let opt=document.createElement('option'); opt.value=ev; opt.textContent=ev;
+  eventoSelect.appendChild(opt);
+});
+
+// --- Preencher narradores ---
+function populateNarrators(){
+  narradorSelect.innerHTML='';
+  if(eventoSelect.value && data[eventoSelect.value]){
+    Object.keys(data[eventoSelect.value].narrativas).forEach(n=>{
+      let o=document.createElement('option'); o.value=n; o.textContent=n;
+      narradorSelect.appendChild(o);
+    });
+  }
+}
+eventoSelect.addEventListener('change', populateNarrators);
+populateNarrators();
+
+// --- Reset ---
+resetViewBtn.addEventListener('click', ()=>{
+  eventoSelect.selectedIndex=0;
+  narradorSelect.innerHTML='';
+  narrativeText.textContent='Selecione um evento e um narrador, depois clique em "Mostrar narrativa".';
+  eventImageContainer.innerHTML='';
+  playADBtn.disabled=true;
+  comparisonArea.innerHTML='';
+  updateRecordingStatus('');
+});
+
+// --- Mostrar narrativa (Lógica atualizada para nova imagem) ---
+document.getElementById('showNarrative').addEventListener('click', ()=>{
+  const ev=eventoSelect.value, nar=narradorSelect.value;
+  if(ev && nar){
+    // Se for Estudante e houver gravação, mostra mensagem especial
+    if (nar === "Estudante" && hasRecordingForCurrentEvent()) {
+      narrativeText.textContent = "🎤 Narrativa em áudio disponível - clique em 'Reproduzir Gravação' para ouvir.";
+    } else {
+      narrativeText.textContent = data[ev].narrativas[nar];
+    }
+
+    // Lógica para obter a imagem específica da situação (Evento + Narrador)
+    const eventImgSrc = eventImageMapping[ev] ? eventImageMapping[ev][nar] : '';
+    let imageToShow = '';
+    let altText = '';
+
+    if(eventImgSrc){
+      imageToShow = eventImgSrc;
+      altText = `Imagem do evento ${ev} na perspectiva de ${nar}`;
+    } else {
+      // Fallback: se não houver imagem para a situação, usa a imagem do perfil do narrador
+      imageToShow = imageMapping[nar] || '';
+      altText = `Imagem ilustrativa do narrador ${nar}`;
+    }
+    
+    if (imageToShow) {
+      eventImageContainer.innerHTML=`<img src="${imageToShow}" alt="${altText}">`;
+    } else {
+      eventImageContainer.innerHTML = '';
+    }
+    
+    // Habilita o botão de Audiodescrição se houver texto AD
+    playADBtn.disabled=!data[ev].ad[nar];
+    playADBtn.onclick=()=>speakText(data[ev].ad[nar],"pt-BR");
+    comparisonArea.innerHTML='';
+  }
+});
+
+// --- Comparação (Lógica atualizada para nova imagem) ---
+compareBtn.addEventListener('click', ()=>{
+  const ev=eventoSelect.value;
+  if(!ev) return;
+  const narrativas=data[ev].narrativas;
+  const ads=data[ev].ad;
+  comparisonArea.innerHTML="<h2>Comparação de Narrativas</h2>";
+  const container=document.createElement('div');
+  container.className="compare-grid";
+  
+  Object.keys(narrativas).forEach(n=>{
+    const div=document.createElement('div');
+    div.className="card";
+    
+    // Busca a imagem específica do evento/narrador (ou usa a imagem de perfil como fallback)
+    const compareImgSrc = eventImageMapping[ev] && eventImageMapping[ev][n] ? eventImageMapping[ev][n] : imageMapping[n];
+    const altText = `Imagem do evento ${ev} na perspectiva de ${n}`;
+
+    let textoNarrativa = narrativas[n];
+    // Se for Estudante e houver gravação, mostra mensagem especial
+    if (n === "Estudante" && hasRecordingForCurrentEvent()) {
+      textoNarrativa = "🎤 Narrativa em áudio (gravação do estudante)";
+    }
+
+    div.innerHTML=`
+      <h3>${n}</h3>
+      <p>${textoNarrativa}</p>
+      <img src="${compareImgSrc}" alt="${altText}">
+      <button onclick='speakText(${JSON.stringify(textoNarrativa)},"pt-BR")'>▶️ Áudio</button>
+      <button onclick='speakText(${JSON.stringify(ads[n])},"pt-BR")'>♿ Audiodescrição</button>
+    `;
+    container.appendChild(div);
+  });
+  comparisonArea.appendChild(container);
+});
+
+// ------------------------------------------------------------------
+// --- IMPLEMENTAÇÃO DE ÁUDIO REVISADA ---
+// ------------------------------------------------------------------
+
+// --- TTS (Text-to-Speech) ---
+let voices=[];
+function loadVoices(){ voices=speechSynthesis.getVoices(); }
+speechSynthesis.onvoiceschanged=loadVoices;
+loadVoices();
+function speakText(text,lang){
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang=lang;
+  u.voice=voices.find(v=>v.lang===lang)||null;
+  speechSynthesis.speak(u);
+}
+
+// Variável global para controlar o áudio REAL que está sendo reproduzido
+let currentAudio = null;
+
+playAudioBtn.addEventListener('click', ()=>{
+  const ev = eventoSelect.value;
+  const nar = narradorSelect.value;
+  
+  // 1. Para o áudio anterior, se estiver tocando
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+  }
+
+  // Se for Estudante e houver gravação, toca a gravação
+  if (nar === "Estudante" && hasRecordingForCurrentEvent()) {
+    const recordingURL = getRecordingForCurrentEvent();
+    currentAudio = new Audio(recordingURL);
+    currentAudio.play().catch(error => {
+      console.error("Erro ao reproduzir gravação:", error);
+      updateRecordingStatus("❌ Erro ao reproduzir gravação");
+    });
+    return;
+  }
+
+  // 2. Tenta buscar o caminho do arquivo de áudio real
+  const audioPath = audioMapping[ev] ? audioMapping[ev][nar] : null;
+
+  if (audioPath) {
+    // 3. Se encontrar o caminho, tenta reproduzir o arquivo
+    currentAudio = new Audio(audioPath);
+    currentAudio.play()
+        .then(() => {
+            // Sucesso na reprodução
+            console.log("Áudio real reproduzido com sucesso:", audioPath);
+        })
+        .catch(error => {
+            // 4. Fallback se a reprodução do arquivo real falhar (Ex: bloqueio do navegador, arquivo não encontrado)
+            console.error("Erro ao tentar reproduzir arquivo de áudio. Usando TTS como fallback:", error);
+            speakText(data[ev].narrativas[nar], "pt-BR");
+        });
+  } else if (ev && nar) {
+    // 5. Se não houver arquivo real mapeado, usa o TTS
+    console.log("Caminho de áudio não mapeado, usando TTS.");
+    speakText(data[ev].narrativas[nar], "pt-BR");
+  }
+});
+
+stopAudioBtn.addEventListener('click', ()=>{
+  speechSynthesis.cancel(); // Para o TTS
+  if(currentAudio){
+    currentAudio.pause();
+    currentAudio.currentTime = 0;
+  }
+});
+
+// ------------------------------------------------------------------
+// --- SISTEMA DE GRAVAÇÃO CORRIGIDO ---
+// ------------------------------------------------------------------
+
+let mediaRecorder = null;
+let audioChunks = [];
+let audioStream = null;
+
+// Função para atualizar o status da gravação
+function updateRecordingStatus(message, type = '') {
+  recordingStatus.textContent = message;
+  recordingStatus.className = 'recording-status';
+  if (type) {
+    recordingStatus.classList.add(type);
+  }
+}
+
+// Função para verificar se há gravação para o evento atual
+function hasRecordingForCurrentEvent() {
+  const eventKey = `recording_${eventoSelect.value.replace(/\s+/g, '_')}`;
+  return localStorage.getItem(eventKey) !== null;
+}
+
+// Função para obter a gravação do evento atual
+function getRecordingForCurrentEvent() {
+  const eventKey = `recording_${eventoSelect.value.replace(/\s+/g, '_')}`;
+  const savedRecording = localStorage.getItem(eventKey);
+  if (savedRecording) {
+    const uint8Array = new Uint8Array(JSON.parse(savedRecording));
+    const blob = new Blob([uint8Array], { type: 'audio/webm' });
+    return URL.createObjectURL(blob);
+  }
+  return null;
+}
+
+// Função para salvar a gravação no localStorage
+function saveRecording(blob) {
+  const reader = new FileReader();
+  reader.onload = function() {
+    const arrayBuffer = this.result;
+    const uint8Array = new Uint8Array(arrayBuffer);
+    
+    // Salva no localStorage com chave única baseada no evento
+    const eventKey = `recording_${eventoSelect.value.replace(/\s+/g, '_')}`;
+    localStorage.setItem(eventKey, JSON.stringify(Array.from(uint8Array)));
+    
+    updateRecordingStatus('✅ Gravação salva com sucesso!', 'recording-saved');
+    recPlayBtn.disabled = false;
+    recDeleteBtn.disabled = false;
+    
+    // Atualiza a narrativa do Estudante para mostrar que há gravação
+    if (narradorSelect.value === "Estudante") {
+      narrativeText.textContent = "🎤 Narrativa em áudio disponível - clique em 'Reproduzir Gravação' para ouvir.";
+    }
+  };
+  reader.readAsArrayBuffer(blob);
+}
+
+// Função para excluir gravação
+function deleteRecording() {
+  const eventKey = `recording_${eventoSelect.value.replace(/\s+/g, '_')}`;
+  localStorage.removeItem(eventKey);
+  
+  updateRecordingStatus('Gravação excluída');
+  recPlayBtn.disabled = true;
+  recDeleteBtn.disabled = true;
+  
+  // Restaura a narrativa original do Estudante
+  if (narradorSelect.value === "Estudante") {
+    narrativeText.textContent = data[eventoSelect.value].narrativas["Estudante"] || "";
+  }
+}
+
+// Inicializar sistema de gravação
+async function initializeRecording() {
+  try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error('Seu navegador não suporta gravação de áudio');
+    }
+
+    // Verificar se há gravação salva para o evento atual
+    checkSavedRecording();
+
+  } catch (error) {
+    console.error('Erro ao inicializar gravação:', error);
+    recStartBtn.disabled = true;
+    updateRecordingStatus('❌ Gravação não suportada neste navegador');
+  }
+}
+
+// Verificar se há gravação salva
+function checkSavedRecording() {
+  if (hasRecordingForCurrentEvent()) {
+    recPlayBtn.disabled = false;
+    recDeleteBtn.disabled = false;
+    updateRecordingStatus('Gravação disponível para este evento');
+  } else {
+    updateRecordingStatus('Nenhuma gravação salva para este evento');
+  }
+}
+
+// Event Listeners para gravação
+recStartBtn.addEventListener('click', async () => {
+  if (!eventoSelect.value) {
+    updateRecordingStatus('❌ Selecione um evento primeiro');
+    return;
+  }
+
+  try {
+    // Obter acesso ao microfone
+    audioStream = await navigator.mediaDevices.getUserMedia({ 
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        sampleRate: 44100
+      } 
+    });
+
+    // Criar MediaRecorder
+    mediaRecorder = new MediaRecorder(audioStream, {
+      mimeType: 'audio/webm;codecs=opus'
+    });
+
+    audioChunks = [];
+
+    mediaRecorder.ondataavailable = (event) => {
+      if (event.data.size > 0) {
+        audioChunks.push(event.data);
+      }
+    };
+
+    mediaRecorder.onstop = () => {
+      const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+      saveRecording(audioBlob);
+      
+      // Parar todas as tracks do stream
+      if (audioStream) {
+        audioStream.getTracks().forEach(track => track.stop());
+        audioStream = null;
+      }
+    };
+
+    mediaRecorder.onerror = (event) => {
+      console.error('Erro na gravação:', event.error);
+      updateRecordingStatus('❌ Erro na gravação');
+    };
+
+    // Iniciar gravação
+    mediaRecorder.start();
+    recStartBtn.disabled = true;
+    recStopBtn.disabled = false;
+    recPlayBtn.disabled = true;
+    updateRecordingStatus('🔴 Gravando...', 'recording-active');
+
+  } catch (error) {
+    console.error('Erro ao acessar microfone:', error);
+    updateRecordingStatus('❌ Não foi possível acessar o microfone');
+    recStartBtn.disabled = true;
+  }
+});
+
+recStopBtn.addEventListener('click', () => {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop();
+    recStartBtn.disabled = false;
+    recStopBtn.disabled = true;
+  }
+});
+
+recPlayBtn.addEventListener('click', () => {
+  const recordingURL = getRecordingForCurrentEvent();
+  if (recordingURL) {
+    // Para qualquer áudio que esteja tocando
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    }
+    speechSynthesis.cancel();
+    
+    // Toca a gravação
+    currentAudio = new Audio(recordingURL);
+    currentAudio.play().catch(error => {
+      console.error('Erro ao reproduzir áudio:', error);
+      updateRecordingStatus('❌ Erro ao reproduzir gravação');
+    });
+  }
+});
+
+recDeleteBtn.addEventListener('click', deleteRecording);
+
+// Verificar gravação salva quando mudar o evento
+eventoSelect.addEventListener('change', () => {
+  checkSavedRecording();
+});
+
+// Inicializar o sistema de gravação quando a página carregar
+initializeRecording();
+</script>
+</body>
+</html>
