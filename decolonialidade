@@ -159,7 +159,7 @@ button:hover {
 
   const audioMapping = {
     "Colonização do Brasil (século XVI e XVII)": {
-      "Português": "audio/Text-to-Speech.mp3", 
+      "Português": "audio/portugues-chegada.wav", 
       "Indígena": "audio/indi.mp3",
       "Africano escravizado": "audio/neg.mp3",
     },
